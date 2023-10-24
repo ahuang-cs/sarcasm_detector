@@ -57,8 +57,8 @@ class SklearnTrainer():
     def get_data(self):
         local_dataset_path = Path(Dataset.get(
             dataset_project="sarcasm_detector",
-            dataset_name="sarcasm_dataset",
-            alias="sarcasm_dataset"
+            dataset_name="kaggle_sarcasm",
+            alias="kaggle_sarcasm"
         ).get_local_copy())
 
         dataset = load_dataset(
