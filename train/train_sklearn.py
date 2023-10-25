@@ -11,7 +11,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import Pipeline
 
-from utils import plot_confusion_matrix
+from report.utils import plot_confusion_matrix
 
 
 class SklearnTrainer():
@@ -99,8 +99,8 @@ class SklearnTrainer():
             title=f"{self.model} Confusion Matrix"
         )
 
-        os.makedirs("my_awesome_model", exist_ok=True)
-        joblib.dump(self.pipeline, f"my_awesome_model/sklearn_classifier_{uuid4()}.joblib")
+        os.makedirs("./model", exist_ok=True)
+        joblib.dump(self.pipeline, f"./model/sklearn_classifier_{uuid4()}.joblib")
 
 
 if __name__ == '__main__':

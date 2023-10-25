@@ -8,7 +8,7 @@ from datasets import load_dataset
 from transformers import (AutoModelForSequenceClassification, AutoTokenizer,
                           DataCollatorWithPadding, Trainer, TrainingArguments)
 
-from utils import plot_confusion_matrix
+from report.utils import plot_confusion_matrix
 
 
 def cast_keys_to_string(d, changed_keys=dict()):
@@ -41,13 +41,21 @@ def cast_keys_back(d, changed_keys):
 
 class SarcasmTrainer:
     def __init__(self, seed=42, subset_size=0):
+        Task.add_requirements("torch")
+
+        self.task = Task.init(
+            project_name="sarcasm_detector",
+            task_name="DistilBert Training",
+            output_uri=True
+        )
+
         self.accuracy = evaluate.load("accuracy")
         self.classes = ["NORMAL", "SARCASTIC"]
         self.id2label = {0: "NORMAL", 1: "SARCASTIC"}
         self.label2id = {"NORMAL": 0, "SARCASTIC": 1}
-        Task.current_task().set_parameter("seed", seed)
+        self.task.set_parameter("seed", seed)
         self.seed = seed
-        Task.current_task().set_parameter("subset_size", subset_size)
+        self.task.set_parameter("subset_size", subset_size)
         self.subset_size = subset_size
 
         self.tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
@@ -93,7 +101,7 @@ class SarcasmTrainer:
         predictions = np.argmax(predictions, axis=1)
         plot_confusion_matrix(labels, predictions, self.classes, title='DistilBERT Confusion Matrix')
         accuracy = self.accuracy.compute(predictions=predictions, references=labels)
-        Task.current_task().get_logger().report_single_value("Accuracy", accuracy['accuracy'])
+        self.task.get_logger().report_single_value("Accuracy", accuracy['accuracy'])
         return accuracy
 
     def train(self):
@@ -101,7 +109,7 @@ class SarcasmTrainer:
         data_collator, tokenized_dataset = self.tokenize_data(dataset)
 
         training_args = TrainingArguments(
-            output_dir="my_awesome_model",
+            output_dir="./model",
             learning_rate=2e-5,
             per_device_train_batch_size=16,
             per_device_eval_batch_size=16,
@@ -116,7 +124,7 @@ class SarcasmTrainer:
         # Allow ClearML access to the training args and allow it to override the arguments for remote execution
         args_class = type(training_args)
         args, changed_keys = cast_keys_to_string(training_args.to_dict())
-        Task.current_task().connect(args)
+        self.task.connect(args)
         training_args = args_class(**cast_keys_back(args, changed_keys)[0])
 
         print(f"Training with params: {training_args}")
@@ -135,7 +143,5 @@ class SarcasmTrainer:
 
 
 if __name__ == '__main__':
-    Task.add_requirements("torch")
-    Task.init(project_name="sarcasm_detector", task_name="DistilBert Training")
     sarcasm_trainer = SarcasmTrainer(subset_size=1000)
     sarcasm_trainer.train()

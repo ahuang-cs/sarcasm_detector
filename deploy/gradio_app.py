@@ -2,8 +2,8 @@ import gradio as gr
 import joblib
 from transformers import pipeline
 
-transformer_pipeline = pipeline("text-classification", model="./my_awesome_model/checkpoint-best", device='cuda:0')
-sklearn_pipeline = joblib.load("my_awesome_model/sklearn_classifier_ffa779cd-0944-4d7b-a5da-cb5f749f06ee.joblib")
+transformer_pipeline = pipeline("text-classification", model="./model/checkpoint-best", device='cuda:0')
+sklearn_pipeline = joblib.load("./model/sklearn_classifier_ffa779cd-0944-4d7b-a5da-cb5f749f06ee.joblib")
 
 input_text = gr.Textbox(lines=2, placeholder="Sentence Here...")
 

@@ -69,11 +69,11 @@ def log_to_csv(text, model_output, csv_name, count, prefix=""):
 def create_clearml_dataset_version(csv_filename, amount, counter):
     paths = glob.glob(str(Path("flagged") / f"*_{csv_filename}"))
     if paths:
-        latest_clearml_dataset_id = Dataset.get(dataset_project="sarcasm_detector", dataset_name="sarcasm_dataset").id
+        latest_clearml_dataset_id = Dataset.get(dataset_project="sarcasm_detector", dataset_name="kaggle_sarcasm").id
         print(f"{latest_clearml_dataset_id=}")
         updated_dataset = Dataset.create(
             dataset_project="sarcasm_detector",
-            dataset_name="sarcasm_dataset",
+            dataset_name="kaggle_sarcasm",
             parent_datasets=[latest_clearml_dataset_id]
         )
         [updated_dataset.add_files(path) for path in paths]

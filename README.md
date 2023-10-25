@@ -24,7 +24,7 @@ The data is located in the `data` folder, it is a slightly preprocessed version 
 Next, in order to work properly, this data has to be read into a ClearML Data Dataset. You only need 3 commands:
 
 ```
-$ clearml-data create --project sarcasm_detector --name sarcasm_dataset
+$ clearml-data create --project sarcasm_detector --name kaggle_sarcasm
 ...
 $ clearml-data add --files data
 ...
