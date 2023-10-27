@@ -54,9 +54,9 @@ class GradioApp():
     def log_to_csv(self, text, model_output, csv_name, count, prefix=""):
         os.makedirs("flagged", exist_ok=True)
         log_filepath = Path("flagged") / (prefix + str(csv_name))
-        csv_data = [text] + self.parse_output_to_label(model_output)
+        csv_data = self.parse_output_to_label(model_output) + [text]
 
-        with open(log_filepath, "a", newline="") as csvfile:
+        with open(log_filepath, "a", newline="", encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             if os.stat(log_filepath).st_size > 0:
                 pass
