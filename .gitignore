@@ -1,6 +1,7 @@
 **/__pycache__/**
 model
 .venv
+venv
 .pytest_cache
 videos
 log.csv
