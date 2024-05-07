@@ -6,6 +6,7 @@ args = {
 }
 # create an dataset experiment
 task = Task.init(project_name="MTQE", task_name="Upload to S3")
+task.connect(args)
 
 # only create the task, we will actually execute it later
 task.running_locally()

@@ -3,7 +3,7 @@ import json
 import os
 import pandas as pd
 from sklearn.metrics import precision_recall_fscore_support, average_precision_score
-from clearml import Task, Logger
+from clearml import Task, StorageManager, Logger
 
 task = Task.init(project_name="MTQE", task_name="Evaluate Labels")
 
@@ -23,7 +23,7 @@ task.connect(args)
 task.execute_remotely('mdr-cpu')
 
 
-items_file = args['items']
+items_file = StorageManager.get_local_copy(remote_url=args['items'])
 with open(items_file) as f:
     items = [json.loads(item) for item in f]
 
@@ -54,28 +54,28 @@ for group_name in group_names:
                                for item in group_items])
     pred_labels = numpy.array([item[args['pred_label_key']]
                                for item in group_items])
-    if not label_set:
-        label_set = list(set(gold_labels))
+    if not args['label_set']:
+        args['label_set'] = list(set(gold_labels))
 
     precs, recs, f1s, n_items = precision_recall_fscore_support(y_true=gold_labels,
                                                                 y_pred=pred_labels,
-                                                                labels=label_set)
+                                                                labels=args['label_set'])
     mean_prec, mean_rec, mean_f1, _ = precision_recall_fscore_support(y_true=gold_labels,
                                                                       y_pred=pred_labels,
                                                                       average="weighted")
     results[group_name] = {args['aggregated_labels_name']: {"precision": mean_prec, "recall": mean_rec, "f1": mean_f1, "n_items": len(group_items)},
                            **{label: {"precision": prec, "recall": rec, "f1": f1, "n_items": int(n)}
-                              for label, prec, rec, f1, n in zip(label_set, precs, recs, f1s, n_items)}}
+                              for label, prec, rec, f1, n in zip(args['label_set'], precs, recs, f1s, n_items)}}
 
 print(json.dumps(results, indent=4))
 
 if not args['out_file']:
-    out_file = "{}.results.json".format(os.path.splitext(items_file)[0])
-with open(out_file, "w") as f:
+    args['out_file'] = "{}.results.json".format(os.path.splitext(items_file)[0])
+with open(args['out_file'], "w") as f:
     json.dump(results, f, indent=4)
-print("Saved results to {}".format(out_file))
+print("Saved results to {}".format(['out_file']))
 
-Logger.current_logger().report_table(pd.DataFrame.from_dict(results[args['default_group_name']]))
+Logger.current_logger().report_table(title=args['default_group_name'], series='pandas DataFrame', table_plot=pd.DataFrame.from_dict(results[args['default_group_name']]))
 
 
 task.close()
