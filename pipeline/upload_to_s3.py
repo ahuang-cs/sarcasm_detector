@@ -5,7 +5,7 @@ args = {
     'dst' : 's3://lw-data/ahuang/en_nl_sample_outputs.jsonl'
 }
 # create an dataset experiment
-task = Task.init(project_name="MTQE", task_name="Upload to S3")
+task = Task.init(project_name="examples", task_name="Upload to S3")
 task.connect(args)
 
 # only create the task, we will actually execute it later

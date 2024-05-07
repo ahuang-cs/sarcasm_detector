@@ -8,7 +8,8 @@ from clearml import Task, StorageManager, Logger
 task = Task.init(project_name="MTQE", task_name="Evaluate Labels")
 
 args = {
-    'items' : 's3://lw-data/ahuang/en_nl_sample_outputs.jsonl',
+    's3_upload_task_id': '2b2201e3d4da45eb91461fa176fc0718',
+    'items' : '',  # eg. s3://lw-data/ahuang/en_nl_sample_outputs.jsonl
     'out_file' : None,
     'gold_label_key' : "label",
     'pred_label_key' : "output",
@@ -22,7 +23,9 @@ args = {
 task.connect(args)
 task.execute_remotely('mdr-cpu')
 
-
+if args['s3_upload_task_id']:
+    s3_upload_task = Task.get_task(task_id=args['s3_upload_task_id'])
+    args['items'] = s3_upload_task.artifacts['sample outputs'].get_local_copy()
 items_file = StorageManager.get_local_copy(remote_url=args['items'])
 with open(items_file) as f:
     items = [json.loads(item) for item in f]
